@@ -1,9 +1,17 @@
 const canvas = document.createElement("canvas");
-document.body.appendChild(canvas);
+document.querySelector(".game-container").appendChild(canvas);
 const ctx = canvas.getContext("2d");
 
 canvas.width = 900;
 canvas.height = 450;
+
+// ===== UI ELEMENTS =====
+const startScreen = document.querySelector(".start-screen");
+const gameOverScreen = document.querySelector(".game-over");
+const hud = document.querySelector(".hud");
+
+// ===== GAME STATE =====
+let gameRunning = false;
 
 // ===== CAMERA =====
 let cameraX = 0;
@@ -14,7 +22,6 @@ const player = {
     y: 300,
     w: 30,
     h: 30,
-    dx: 0,
     dy: 0,
     speed: 3,
     jumpPower: -11,
@@ -22,18 +29,6 @@ const player = {
     health: 5,
     canAttack: true
 };
-
-// ===== ATTACK =====
-let attackBox = {
-    x: 0,
-    y: 0,
-    w: 40,
-    h: 20,
-    active: false
-};
-
-// ===== GRAVITY =====
-const gravity = 0.6;
 
 // ===== LEVEL =====
 const level = {
@@ -52,27 +47,52 @@ let keys = {};
 document.addEventListener("keydown", e => keys[e.code] = true);
 document.addEventListener("keyup", e => keys[e.code] = false);
 
-// ===== ATTACK LOGIC =====
+// ===== START GAME =====
+function startGame() {
+    startScreen.style.display = "none";
+    gameRunning = true;
+    loop();
+}
+
+// ===== GAME OVER =====
+function endGame() {
+    gameRunning = false;
+    gameOverScreen.style.display = "flex";
+}
+
+// ===== RESTART =====
+function restartGame() {
+    location.reload();
+}
+
+// ===== ATTACH BUTTONS =====
+document.querySelector(".start-btn").addEventListener("click", startGame);
+document.querySelector(".restart-btn").addEventListener("click", restartGame);
+
+// ===== ATTACK =====
 document.addEventListener("keydown", e => {
-    if (e.code === "KeyZ" && player.canAttack) {
+    if (e.code === "KeyZ" && gameRunning && player.canAttack) {
         attack();
     }
 });
 
+let attackBox = { x: 0, y: 0, w: 40, h: 20, active: false };
+
 function attack() {
     player.canAttack = false;
-
     attackBox.active = true;
+
     attackBox.x = player.x + 20;
     attackBox.y = player.y + 10;
 
     setTimeout(() => attackBox.active = false, 150);
-
     setTimeout(() => player.canAttack = true, 400);
 }
 
 // ===== UPDATE =====
 function update() {
+
+    if (!gameRunning) return;
 
     // Movement
     if (keys["ArrowRight"]) player.x += player.speed;
@@ -85,7 +105,7 @@ function update() {
     }
 
     // Gravity
-    player.dy += gravity;
+    player.dy += 0.6;
     player.y += player.dy;
 
     player.grounded = false;
@@ -99,34 +119,34 @@ function update() {
         }
     });
 
-    // Enemy logic
+    // Enemies
     level.enemies.forEach(e => {
 
         e.x += e.dir * 1.2;
 
         if (e.x < 500 || e.x > 750) e.dir *= -1;
 
-        // enemy hit by attack
         if (attackBox.active && collide(attackBox, e)) {
             e.health--;
-            e.x += 10; // knockback
-
-            if (e.health <= 0) {
-                e.dead = true;
-            }
+            e.x += 10;
         }
 
-        // enemy hits player
         if (collide(player, e)) {
             player.health--;
             player.x -= 20;
         }
+
+        if (player.health <= 0) {
+            endGame();
+        }
     });
 
-    // remove dead enemies
-    level.enemies = level.enemies.filter(e => !e.dead);
+    level.enemies = level.enemies.filter(e => e.health > 0);
 
     cameraX = player.x - 150;
+
+    // HUD update
+    hud.innerHTML = `Health: ${player.health}`;
 }
 
 // ===== COLLISION =====
@@ -146,43 +166,31 @@ function draw() {
     ctx.save();
     ctx.translate(-cameraX, 0);
 
-    // player
+    // Player
     ctx.fillStyle = "blue";
     ctx.fillRect(player.x, player.y, player.w, player.h);
 
-    // attack box
+    // Attack
     if (attackBox.active) {
         ctx.fillStyle = "cyan";
         ctx.fillRect(attackBox.x, attackBox.y, attackBox.w, attackBox.h);
     }
 
-    // platforms
+    // Platforms
     ctx.fillStyle = "green";
     level.platforms.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
 
-    // enemies
+    // Enemies
     ctx.fillStyle = "black";
-    level.enemies.forEach(e => {
-        ctx.fillRect(e.x, e.y, e.w, e.h);
-
-        // health bar
-        ctx.fillStyle = "red";
-        ctx.fillRect(e.x, e.y - 5, e.health * 10, 3);
-        ctx.fillStyle = "black";
-    });
+    level.enemies.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
 
     ctx.restore();
-
-    // UI
-    ctx.fillStyle = "black";
-    ctx.fillText("Health: " + player.health, 20, 20);
 }
 
 // ===== LOOP =====
 function loop() {
+    if (!gameRunning) return;
     update();
     draw();
     requestAnimationFrame(loop);
 }
-
-loop();
