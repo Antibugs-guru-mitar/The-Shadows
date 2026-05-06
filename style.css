@@ -1,0 +1,126 @@
+/* ===== RESET ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle, #1a1a1a, #000);
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+/* ===== GAME WRAPPER ===== */
+.game-container {
+    position: relative;
+    width: 900px;
+    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* ===== CANVAS ===== */
+canvas {
+    display: block;
+    background: linear-gradient(to top, #2b2b2b, #7a7a7a);
+    border: 3px solid #444;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8);
+}
+
+/* ===== HUD (TOP UI) ===== */
+.hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 2px 2px 5px black;
+}
+
+/* ===== START SCREEN ===== */
+.start-screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.start-screen h1 {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+.start-screen button {
+    padding: 12px 25px;
+    font-size: 18px;
+    background: #222;
+    color: white;
+    border: 2px solid #555;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.start-screen button:hover {
+    background: #444;
+}
+
+/* ===== GAME OVER SCREEN ===== */
+.game-over {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    color: red;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+.game-over h1 {
+    font-size: 50px;
+    margin-bottom: 20px;
+}
+
+.game-over button {
+    padding: 12px 25px;
+    font-size: 18px;
+    background: darkred;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* ===== MOBILE TOUCH BUTTONS (future use) ===== */
+.controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.controls button {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid #666;
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+}
+
+.controls button:active {
+    background: rgba(255,255,255,0.3);
+}
